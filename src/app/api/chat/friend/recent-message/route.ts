@@ -36,7 +36,7 @@ export const GET = async (req: NextRequest) => {
   const friendList = conversations.map((item) => {
     const latestMessage = item.Messages[0] || null;
 
-    // Get the other user in the conversation
+    //@ts-ignore
     const friend = item.ConversationParticipant.find((p) => p.userId !== userId)?.user;
 
     return {
