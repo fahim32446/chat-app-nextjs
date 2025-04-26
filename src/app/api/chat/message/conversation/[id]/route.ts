@@ -3,13 +3,15 @@ import prisma from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 
 export type RouteParamsWithId = {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 };
 
 export async function GET(req: NextRequest, { params }: RouteParamsWithId) {
-  const conversationId = params?.id;
+  const PARAMS = await params;
+
+  const conversationId = PARAMS?.id;
   const session = await auth();
 
   if (!session?.user) {

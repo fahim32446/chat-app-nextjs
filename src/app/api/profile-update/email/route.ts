@@ -10,9 +10,10 @@ interface IBody {
   password: string;
 }
 
-export const PUT = auth(async (req: NextRequest & { auth: Session | null }) =>
+export const PUT = async (req: NextRequest) =>
   handleRequest(async () => {
-    const userId = req?.auth?.user?.id;
+    const session = await auth();
+    const userId = session?.user?.id;
 
     if (!userId) {
       return NextResponse.json({ message: 'Not authenticated' }, { status: 401 });
@@ -49,5 +50,4 @@ export const PUT = auth(async (req: NextRequest & { auth: Session | null }) =>
     }
 
     return NextResponse.json({ message: 'Email has been changed', status: 201 }, { status: 201 });
-  })
-);
+  });

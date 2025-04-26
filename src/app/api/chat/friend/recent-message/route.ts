@@ -1,17 +1,16 @@
 import { auth } from '@/auth';
 import { handleRequest } from '@/lib/helper';
 import prisma from '@/lib/prisma';
-import { Session } from 'next-auth';
 import { NextRequest, NextResponse } from 'next/server';
 
-export const GET = auth(async (req: NextRequest & { auth: Session | null }) => {
+export const GET = (req: NextRequest) => {
   return handleRequest(async () => {
-    const userId = '67ec113c13f70d865ddb340a';
-    // const userId = req?.auth?.user?.id;
+    const session = await auth();
+    const userId = session?.user?.id;
 
-    // if (!userId) {
-    //   return NextResponse.json({ message: 'Not authenticated' }, { status: 401 });
-    // }
+    if (!userId) {
+      return NextResponse.json({ message: 'Not authenticated' }, { status: 401 });
+    }
 
     const conversations = await prisma.conversation.findMany({
       where: {
@@ -64,4 +63,4 @@ export const GET = auth(async (req: NextRequest & { auth: Session | null }) => {
       data: friendList,
     });
   });
-});
+};

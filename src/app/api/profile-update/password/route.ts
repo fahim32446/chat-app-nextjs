@@ -2,7 +2,6 @@ import { auth } from '@/auth';
 import { handleRequest, saltAndHashPassword } from '@/lib/helper';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import { Session } from 'next-auth';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface IBody {
@@ -10,9 +9,10 @@ interface IBody {
   currentPassword: string;
 }
 
-export const PUT = auth(async (req: NextRequest & { auth: Session | null }) =>
+export const PUT = async (req: NextRequest) =>
   handleRequest(async () => {
-    const userId = req?.auth?.user?.id;
+    const session = await auth();
+    const userId = session?.user?.id;
 
     if (!userId) {
       return NextResponse.json({ message: 'Not authenticated' }, { status: 401 });
@@ -57,5 +57,4 @@ export const PUT = auth(async (req: NextRequest & { auth: Session | null }) =>
       message: 'Password has been updated successfully',
       status: 200,
     });
-  })
-);
+  });

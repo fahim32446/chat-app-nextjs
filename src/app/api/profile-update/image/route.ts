@@ -1,7 +1,6 @@
 import { auth } from '@/auth';
 import { handleRequest } from '@/lib/helper';
 import prisma from '@/lib/prisma';
-import { Session } from 'next-auth';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface IBody {
@@ -9,15 +8,17 @@ interface IBody {
   key: string;
 }
 
-export const PUT = auth(async (req: NextRequest & { auth: Session | null }) =>
+export const PUT = async (req: NextRequest) =>
   handleRequest(async () => {
-    if (!req?.auth?.user?.id) {
+    const session = await auth();
+    const userId = session?.user?.id;
+
+    if (!userId) {
       return NextResponse.json({ message: 'Not authenticated' }, { status: 401 });
     }
 
-    const userId = req.auth.user.id;
-
     let body: IBody;
+
     try {
       body = await req.json();
     } catch (err) {
@@ -63,5 +64,4 @@ export const PUT = auth(async (req: NextRequest & { auth: Session | null }) =>
       console.error('[PUT_IMAGE_ERROR]', error);
       return NextResponse.json({ message: 'Something went wrong' }, { status: 500 });
     }
-  })
-);
+  });
