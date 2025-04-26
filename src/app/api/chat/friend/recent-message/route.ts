@@ -51,6 +51,7 @@ export const GET = async (req: NextRequest) => {
   });
 
   // Sort by message time
+  //@ts-ignore
   friendList.sort((a, b) => {
     if (!a.timestamp) return 1;
     if (!b.timestamp) return -1;
