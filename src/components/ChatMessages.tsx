@@ -16,7 +16,7 @@ interface ChatMessagesProps {
   conversationId: string | 'new-conversation';
 }
 
-export const ChatMessages = memo(({ conversationId }: ChatMessagesProps) => {
+export const ChatMessages = ({ conversationId }: ChatMessagesProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messages = useAppSelector((state) => state.messages.messages);
 
@@ -148,4 +148,4 @@ export const ChatMessages = memo(({ conversationId }: ChatMessagesProps) => {
       </div>
     </div>
   );
-});
+};
