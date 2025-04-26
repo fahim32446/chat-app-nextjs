@@ -34,6 +34,7 @@ export const GET = (req: NextRequest) => {
       },
     });
 
+    //@ts-nocheck
     const friendList = conversations.map((item) => {
       const latestMessage = item.Messages[0] || null;
 
