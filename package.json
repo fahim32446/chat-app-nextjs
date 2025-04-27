@@ -10,7 +10,7 @@
     "db-generate": "npx prisma generate",
     "db-push": "npx prisma db push",
     "studio": "npx prisma studio",
-    "vercel-build": "prisma generate && prisma migrate deploy && next build",
+    "vercel-build": "npx prisma generate && npx prisma migrate deploy && next build",
     "prisma:generate": "npx prisma generate"
   },
   "dependencies": {
