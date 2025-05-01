@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import ChangeEmail from './_components/ChangeEmail';
 import ChangePassword from './_components/ChangePassword';
 import ProfileImageUpdate from './_components/ProfileImageUpdate';
@@ -15,6 +15,7 @@ import ProfileImageUpdate from './_components/ProfileImageUpdate';
 type ViewType = 'main' | 'email' | 'password';
 
 export default function ProfilePage() {
+  const user = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -63,7 +64,7 @@ export default function ProfilePage() {
                       </div>
                       <div>
                         <h3 className='font-medium'>Email Address</h3>
-                        <p className='text-sm text-muted-foreground'>user@example.com</p>
+                        <p className='text-sm text-muted-foreground'>{user.data?.user.email}</p>
                       </div>
                     </div>
                     <Button variant='outline' onClick={() => setCurrentView('email')}>

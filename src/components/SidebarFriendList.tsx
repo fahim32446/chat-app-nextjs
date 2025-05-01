@@ -12,13 +12,14 @@ import {
   SidebarMenuItem,
 } from './ui/sidebar';
 import { Skeleton } from './ui/skeleton';
+import { useAppSelector } from '@/hooks/redux-hooks';
 
 interface IProps {
-  recent: IRecentConversation[] | undefined;
   handleSelectChat: (conversationId: string, friendId: string) => void;
 }
-const SidebarFriendList = ({ recent, handleSelectChat }: IProps) => {
+const SidebarFriendList = ({ handleSelectChat }: IProps) => {
   const activeId = useParams().id;
+  const recent = useAppSelector((state) => state.recentConversation.recent);
 
   const { data, isLoading } = useGetAllFriendsQuery();
   const friendList = data?.data;

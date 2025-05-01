@@ -15,6 +15,8 @@ const ChatParticipant = (props: Props) => {
   const userId = loginData?.user?.id;
   const chatParticipants = conversationParticipant?.filter((item) => item.id !== userId);
 
+  const onlineUser = useAppSelector((state) => state.onlineUser.users);
+
   return (
     <div className='p-5 space-y-6 bg-background rounded-lg shadow-sm'>
       {/* Participants Section */}
@@ -22,22 +24,30 @@ const ChatParticipant = (props: Props) => {
         <h2 className='text-lg font-semibold pb-2 mb-3 text-primary'>Participants</h2>
 
         {chatParticipants?.length ? (
-          chatParticipants?.map((item, index) => (
-            <div key={index} className='flex items-center mb-3 p-2 rounded'>
-              <div className='relative mr-3'>
-                <Avatar className='h-10 w-10 border'>
-                  <AvatarFallback className='bg-blue-100 text-blue-600'>
-                    {item?.name?.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                <span className='absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border '></span>
+          chatParticipants?.map((item, index) => {
+            const isOnline = onlineUser.includes(item.id);
+
+            return (
+              <div key={index} className='flex items-center mb-3 p-2 rounded'>
+                <div className='relative mr-3'>
+                  <Avatar className='h-10 w-10 border'>
+                    <AvatarFallback className='bg-blue-100 text-blue-600'>
+                      {item?.name?.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  {isOnline ? (
+                    <span className='absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border '></span>
+                  ) : (
+                    ''
+                  )}
+                </div>
+                <div>
+                  <h3 className='font-medium text-primary'>{item?.name}</h3>
+                  <p className='text-xs text-gray-500'>{isOnline ? 'Online' : ''}</p>
+                </div>
               </div>
-              <div>
-                <h3 className='font-medium text-primary'>{item?.name}</h3>
-                <p className='text-xs text-gray-500'>Online</p>
-              </div>
-            </div>
-          ))
+            );
+          })
         ) : (
           <p className='text-sm text-gray-500 italic'>No other participants</p>
         )}

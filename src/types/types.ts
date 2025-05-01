@@ -77,3 +77,9 @@ export interface ICreateGroupResponse {
     conversationId: string;
   }[];
 }
+
+export interface ISidebarPusherType {
+  conversationId: string;
+  lastText: string;
+  timestamp: string;
+}

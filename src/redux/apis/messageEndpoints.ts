@@ -9,6 +9,7 @@ import {
   IRecentConversation,
 } from '@/types/types';
 import { API_ENDPOINTS } from '@/utils/api-endpoints';
+import { setInitialConversations } from '../slice/recentConversationSlice';
 import { baseApi } from './baseAPI';
 
 export const OrderApisEndpoints = baseApi.injectEndpoints({
@@ -18,6 +19,14 @@ export const OrderApisEndpoints = baseApi.injectEndpoints({
         url: API_ENDPOINTS.FRIEND_RECENT_MESSAGE,
         method: 'GET',
       }),
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          if (data?.data) dispatch(setInitialConversations(data.data));
+        } catch (err) {
+          console.error('Failed to fetch and set recent conversations:', err);
+        }
+      },
       providesTags: ['RECENT_CONVERSATION'],
     }),
 

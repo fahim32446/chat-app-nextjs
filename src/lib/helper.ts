@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { isToday, isYesterday, isThisWeek, format, parseISO } from 'date-fns';
 import bcrypt from 'bcryptjs';
+import { Message } from '@/types/types';
 
 export async function handleRequest(handler: () => Promise<NextResponse>) {
   try {
@@ -37,3 +38,11 @@ export async function saltAndHashPassword(password: string): Promise<string> {
   const hashedPassword = await bcrypt.hash(password, salt);
   return hashedPassword;
 }
+
+export const getMessageDate = (timestamp: Date, index: number, messages: Message[]) => {
+  if (index === 0) return true;
+
+  const prevDate = new Date(messages[index - 1].timestamp).toDateString();
+  const currentDate = new Date(timestamp).toDateString();
+  return prevDate !== currentDate;
+};

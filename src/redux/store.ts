@@ -1,13 +1,17 @@
 import { configureStore } from '@reduxjs/toolkit';
+import { baseApi } from './apis/baseAPI';
 import activeChatReducer from './slice/activeChatSlice';
 import messagesReducer from './slice/messagesSlice';
-import { baseApi } from './apis/baseAPI';
+import onlineUserSliceReducer from './slice/onlineUsersSlice';
+import recentConversationReducer from './slice/recentConversationSlice';
 
 export const store = configureStore({
   reducer: {
     [baseApi.reducerPath]: baseApi.reducer,
     activeChat: activeChatReducer,
     messages: messagesReducer,
+    recentConversation: recentConversationReducer,
+    onlineUser: onlineUserSliceReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

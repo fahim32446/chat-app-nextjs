@@ -74,6 +74,15 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // 📢 Push the latest message to sidebar
+    await pusherServer.trigger(`conversation-sidebar`, 'last-message', {
+      data: {
+        conversationId: message.conversationId,
+        lastText: message.text,
+        timestamp: message.timestamp,
+      },
+    });
+
     // 📦 Return the new message
     return NextResponse.json({
       status: 201,

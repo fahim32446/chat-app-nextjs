@@ -1,6 +1,7 @@
 'use client';
 
 import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
+import { getMessageDate } from '@/lib/helper';
 import { cn } from '@/lib/utils';
 import { useGetConversationDetailsQuery } from '@/redux/apis/messageEndpoints';
 import { addMessage, setMessages, setParticipant } from '@/redux/slice/messagesSlice';
@@ -9,7 +10,7 @@ import { pusherClient } from '@/utils/pusher';
 import { format } from 'date-fns';
 import { LoaderCircle } from 'lucide-react';
 import { useSession } from 'next-auth/react';
-import { memo, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Avatar, AvatarFallback } from './ui/avatar';
 
 interface ChatMessagesProps {
@@ -43,7 +44,7 @@ export const ChatMessages = ({ conversationId }: ChatMessagesProps) => {
     pusherClient.subscribe(`conversation-${conversationId}`);
 
     pusherClient.bind('new-message', (data: { message: Message }) => {
-      if (data.message.senderId !== userId) {
+      if (data.message?.senderId !== userId) {
         dispatch(addMessage(data.message));
       }
     });
@@ -65,13 +66,6 @@ export const ChatMessages = ({ conversationId }: ChatMessagesProps) => {
       </div>
     );
   }
-  const getMessageDate = (timestamp: Date, index: number) => {
-    if (index === 0) return true;
-
-    const prevDate = new Date(messages[index - 1].timestamp).toDateString();
-    const currentDate = new Date(timestamp).toDateString();
-    return prevDate !== currentDate;
-  };
 
   if (conversationId === 'new-conversation')
     return <div className='h-full flex justify-center items-center'>Say hello to your friend</div>;
@@ -82,7 +76,7 @@ export const ChatMessages = ({ conversationId }: ChatMessagesProps) => {
           const me = message.senderId === userId;
           return (
             <div key={index}>
-              {getMessageDate(message.timestamp, index) && (
+              {getMessageDate(message.timestamp, index, messages) && (
                 <div className='flex justify-center my-4'>
                   <span className='px-3 py-1 text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-full'>
                     {format(new Date(message.timestamp), 'MMMM d, yyyy')}

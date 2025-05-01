@@ -15,11 +15,13 @@ import {
   SidebarRail,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { useAppDispatch } from '@/hooks/redux-hooks';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
 import { formatTimestamp } from '@/lib/helper';
 import { cn } from '@/lib/utils';
 import { useRecentConversationQuery } from '@/redux/apis/messageEndpoints';
 import { setActiveChat } from '@/redux/slice/activeChatSlice';
+import { updateConversationFromPusher } from '@/redux/slice/recentConversationSlice';
+import { HTTPResponse, ISidebarPusherType } from '@/types/types';
 import {
   MessageSquare,
   Moon,
@@ -28,30 +30,35 @@ import {
   Search,
   Sun,
   User2,
-  Users,
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import Pusher from 'pusher-js';
+import { useEffect, useState } from 'react';
 import { GroupChatModal } from './CreateGroup';
 import SidebarFriendList from './SidebarFriendList';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Button } from './ui/button';
 import { Skeleton } from './ui/skeleton';
+import { usePusherPresence } from '@/hooks/usePusherPresence';
 
 export function ChatSidebar() {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState('');
-  const activeId = useParams().id;
-  const { data: session } = useSession();
-
-  const { data, isLoading } = useRecentConversationQuery();
-
-  const recent = data?.data;
-
   const dispatch = useAppDispatch();
+
+  const onlineUser = useAppSelector((state) => state.onlineUser.users);
+
+  const { data: session } = useSession();
+  usePusherPresence(session?.user.id);
+
+  const activeId = useParams().id;
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const { isLoading } = useRecentConversationQuery();
+
+  const recent = useAppSelector((state) => state.recentConversation.recent);
 
   // Using the complete sidebar state management from your hook
   const { isMobile, open, setOpen, openMobile, setOpenMobile } = useSidebar();
@@ -88,11 +95,28 @@ export function ChatSidebar() {
       })
     );
 
-    // Close mobile sidebar after selection
     if (isMobile) {
       setOpenMobile(false);
     }
   };
+
+  useEffect(() => {
+    const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
+      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
+    });
+
+    const channel = pusher.subscribe('conversation-sidebar');
+
+    channel.bind('last-message', (data: HTTPResponse<ISidebarPusherType>) => {
+      if (data?.data) dispatch(updateConversationFromPusher(data.data));
+    });
+
+    return () => {
+      channel.unbind_all();
+      channel.unsubscribe();
+      pusher.disconnect();
+    };
+  }, []);
 
   return (
     <Sidebar
@@ -172,10 +196,11 @@ export function ChatSidebar() {
             ) : (
               <SidebarMenu className='px-2 space-y-1 mt-2'>
                 {filterConversation?.length ? (
-                  filterConversation.map((item) => {
+                  filterConversation.map((item, index) => {
                     const isGroup = item.isGroup;
+                    const isOnline = onlineUser.includes(item.friendId);
                     return (
-                      <SidebarMenuItem key={item.conversationId}>
+                      <SidebarMenuItem key={index}>
                         <SidebarMenuButton
                           isActive={activeId === item.conversationId}
                           onClick={() => handleSelectChat(item.conversationId, item.friendId)}
@@ -199,6 +224,11 @@ export function ChatSidebar() {
                                 )}
                               </AvatarFallback>
                             </Avatar>
+                            {isOnline ? (
+                              <span className='absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border '></span>
+                            ) : (
+                              ''
+                            )}
                           </div>
                           <div className='flex-1 min-w-0'>
                             <div className='flex justify-between items-center'>
@@ -242,7 +272,7 @@ export function ChatSidebar() {
             )}
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarFriendList recent={recent} handleSelectChat={handleSelectChat} />
+        <SidebarFriendList handleSelectChat={handleSelectChat} />
       </SidebarContent>
 
       <SidebarFooter className='border-t'>
